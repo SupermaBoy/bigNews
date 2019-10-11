@@ -25,12 +25,40 @@
                 <i class="iconfont icon-key"></i>
                 <input type="text" class="input_txt" placeholder="邮箱/手机号">
                 <input type="password" class="input_pass" placeholder="密码">
-                <input type="submit" class="input_sub" value="登 录">
+                <input type="button" class="input_sub" value="登 录">
+                <!-- <input type="submit" class="input_sub" value="登 录"> -->
             </form>
         </div>
 
-    </div> 
-
+    </div>
+    <script src="./js/jquery-1.12.4.min.js"></script>
+    <script src="./tool/url.js"></script>
+    <script>
+        $('.input_sub').on('click', function() {
+            var txt = $('.input_txt').val().trim();
+            var pass = $('.input_pass').val().trim();
+            if(txt === '' || pass === '') {
+                alert('请填写用户名和密码');
+                return;
+            }
+            $.ajax({
+                type: 'post',
+                url: URL_LOGIN,
+                data: {
+                    user_name: txt,
+                    password: pass
+                },
+                success: function(res) {
+                    console.log(res)
+                    if(res.code === 200) {
+                        location.href = './index.html';
+                    } else {
+                        alert('账户或密码错误');
+                    }
+                }
+            })
+        })
+    </script>
 </body>
 
 </html>
