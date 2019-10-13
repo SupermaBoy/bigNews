@@ -137,9 +137,12 @@
 
     <!-- 后添加的javascript -->
     <script>
+        //添加弹窗
         $('#out').on('click', function() {
             $('#myModal').modal('show')
         })
+
+        // 给确认推出添加点击事件 成功跳转 登陆界面
         $('#sureOut').on('click', function() {
             user.out({
                 callback: function(res) {
@@ -151,7 +154,7 @@
                 }
             })
         })
-     
+        // 一上来获取 管理员信息  并显示在页面上  
         user.getUser({
             callback:function(res) {
                 var data = res.data;
