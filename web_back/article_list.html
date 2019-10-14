@@ -34,7 +34,7 @@
                             <option>草稿</option>
                             <option>已发布</option>
                         </select>
-                        <button id="btnSearch" type = "button" class="btn btn-default btn-sm">筛选</button>
+                        <button id="btnSearch" type="button" class="btn btn-default btn-sm">筛选</button>
                     </form>
                 </div>
                 <div class="col-xs-6">
@@ -219,46 +219,54 @@
 
         getCart({
             callback: function (res) {
-                var htmlStr = template('myTemp', res);
-                $('tbody').html(htmlStr);
+                if (res.code === 200) {
+                    var htmlStr = template('myTemp', res);
+                    $('tbody').html(htmlStr);
+                } else {
+                    alert('网络开小差了！')
+                }
             }
         });
-        
 
 
         article.cateGet({
             callback: function (res) {
                 if (res.code === 200) {
-                    var htmlStr = template('temp',res);
+                    var htmlStr = template('temp', res);
                     $('#selCategory').append(htmlStr)
 
                 }
             }
         });
 
-        $('.btn-sm').on('click', function() {
+
+        $('.btn-sm').on('click', function () {
             var type = $('#selCategory').val();
             var state = $('#selStatus').val();
             getCart({
-                data:{
+                data: {
                     type: type,
                     state: state
                 },
                 callback: function (res) {
-                var htmlStr = template('myTemp', res);
-                $('tbody').html(htmlStr);
-            }
+                    if (res.code === 200) {
+                        var htmlStr = template('myTemp', res);
+                        $('tbody').html(htmlStr);
+                    } else {
+                        alert('网络开小差了！')
+                    }
+                }
             })
         });
 
         function getCart(options) {
             $.ajax({
-            url: 'http://localhost:8000/admin/search',
-            data: options.data,
-            success: options.callback
-        })
+                url: 'http://localhost:8000/admin/search',
+                data: options.data,
+                success: options.callback
+            })
         }
-        
+
 
 
     </script>

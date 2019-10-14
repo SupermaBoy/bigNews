@@ -236,6 +236,8 @@
                 callback: function(res) {
                     if(res.code === 200) {
                         location.reload()
+                    } else {
+                        alert('网络开小差了！')
                     }
                 }
             })
