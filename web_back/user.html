@@ -113,7 +113,7 @@
             var password = (fd.get('password')).trim();
             var user_pic = fd.get('user_pic');
             var email = (fd.get('email')).trim();
-            var nickname = (fd.get('nickname')).trim();
+            
             if (username && password && user_pic.name && email && nickname) {
                 user.edit({
                     data: fd,

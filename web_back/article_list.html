@@ -38,7 +38,7 @@
                     </form>
                 </div>
                 <div class="col-xs-6">
-                    <a href="article_release.html" class="btn btn-success btn-sm pull-right" id="release_btn">发表文章</a>
+                    <a href="./article_release.html" class="btn btn-success btn-sm pull-right" id="release_btn">发表文章</a>
                 </div>
             </div>
 
@@ -169,7 +169,7 @@
 
             <div class="row text-center">
                 <ul class="pagination pagination-sm">
-                    <li class="page-item first disabled"><a href="#" class="page-link">首页</a></li>
+                    <!-- <li class="page-item first disabled"><a href="#" class="page-link">首页</a></li>
                     <li class="page-item prev disabled"><a href="#" class="page-link">上一页</a></li>
                     <li class="page-item active"><a href="#" class="page-link">1</a></li>
                     <li class="page-item"><a href="#" class="page-link">2</a></li>
@@ -179,7 +179,7 @@
                     <li class="page-item"><a href="#" class="page-link">6</a></li>
                     <li class="page-item"><a href="#" class="page-link">7</a></li>
                     <li class="page-item next"><a href="#" class="page-link">下一页</a></li>
-                    <li class="page-item last"><a href="#" class="page-link">尾页</a></li>
+                    <li class="page-item last"><a href="#" class="page-link">尾页</a></li> -->
                 </ul>
             </div>
 
@@ -194,7 +194,9 @@
     </script>
     <script src="./tool/url.js"></script>
     <script src="./tool/article.js"></script>
+    <script src="./js/axios.min.js"></script>
     <script src="./js/template-web.js"></script>
+    <script src="./js/jquery.twbsPagination.js"></script>
     <script type="text/html" id="myTemp">
         {{each data v}}
         <tr>
@@ -204,8 +206,8 @@
             <td class="text-center">{{v.date}}</td>
             <td class="text-center">{{v.state}}</td>
             <td class="text-center">
-                <a href="post-edit.html?id=996" class="btn btn-default btn-xs">编辑</a>
-                <a href="javascript:deleteTr( 996 );" class="btn btn-danger btn-xs">删除</a>
+                <a href="./article_edit.html?id={{v.id}}" class="btn btn-default btn-xs">编辑</a>
+                <a href="javascript:;" class="btn btn-danger btn-xs" id={{v.id}}>删除</a>
             </td>
         </tr>
         {{/each}}
@@ -216,15 +218,53 @@
         {{/each}}
     </script>
     <script>
-
+        var myTotal = 1;
         getCart({
             callback: function (res) {
+                // console.log(res)
                 if (res.code === 200) {
                     var htmlStr = template('myTemp', res);
+
                     $('tbody').html(htmlStr);
+                    // 从res中保存totalPage，并设置给分页插件
+                    var totalPages = res.totalPage;
+                    // 每次检测新获取的总页数和之前的总页数是否相同，如果相同，无需重新创建了
+                    if (myTotal === totalPages) {
+                        return;
+                    }
+                    myTotal = totalPages;                    // 更新myTotal的值，后面同时更新结构
+
+                   
+                    // - 生成新分页结构前，先将旧的结构删除(采用插件提供的方式)
+                    $('.pagination').twbsPagination('destroy');
+                    $('.pagination').twbsPagination({
+                        first: '首页',
+                        last: '尾页',
+                        prev: '上一页',
+                        next: '下一页',
+                        totalPages: totalPages, // 总页数，需要服务端告诉我们
+                        visiblePages: 7, // 当前最多显示的页号
+                        onPageClick: function (event, page) {
+                            var page = page;
+                            getCart({
+                                data: {
+                                    page: page
+                                },
+                                callback: function (res) {
+
+                                    if (res.code === 200) {
+                                        var htmlStr = template('myTemp', res);
+                                        $('tbody').html(htmlStr);
+                                    }
+                                }
+                            })
+                        }
+                    });
+                    // 
                 } else {
                     alert('网络开小差了！')
                 }
+
             }
         });
 
@@ -251,13 +291,64 @@
                 callback: function (res) {
                     if (res.code === 200) {
                         var htmlStr = template('myTemp', res);
+                        var totalPages = res.totalPage;
                         $('tbody').html(htmlStr);
+                        var totalPages = res.totalPage;
+                        if (myTotal === totalPages) {
+                            return;
+                        }
+                        myTotal = totalPages;
+                        // console.log('1');
+                        $('.pagination').twbsPagination('destroy');
+                        $('.pagination').twbsPagination({
+                            first: '首页',
+                            last: '尾页',
+                            prev: '上一页',
+                            next: '下一页',
+                            totalPages: totalPages, // 总页数，需要服务端告诉我们
+                            visiblePages: 7, // 当前最多显示的页号
+                            onPageClick: function (event, page) {
+                                var page = page;
+                                getCart({
+                                    data: {
+                                        type: type,
+                                        state: state,
+                                        page: page
+                                    },
+                                    callback: function (res) {
+                                        if (res.code === 200) {
+                                            var htmlStr = template('myTemp', res);
+                                            // var totalPages = res.totalPage;
+                                            $('tbody').html(htmlStr);
+                                        }
+                                    }
+
+                                })
+
+                            }
+                        });
+                        // 
                     } else {
                         alert('网络开小差了！')
                     }
+
                 }
+
             })
         });
+        
+        $('tbody').on('click', '.btn-danger', function() {
+            if(confirm('确定删除吗')) {
+                var id = this.id;
+                var tr = $(this).parents('tr');
+                axios.get('http://localhost:8000/admin/article_delete',{params:{id: id}}).then(function(res) {
+                    tr.remove();
+                    location.reload()
+                })
+                
+            }
+
+        })
 
         function getCart(options) {
             $.ajax({
@@ -266,6 +357,14 @@
                 success: options.callback
             })
         }
+
+
+
+
+
+
+
+
 
 
 
